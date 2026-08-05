@@ -16,8 +16,29 @@ Console.WriteLine(PrettyPrint(parts[0]));
 Console.WriteLine();
 Console.WriteLine("PAYLOAD");
 Console.WriteLine(PrettyPrint(parts[1]));
+Console.WriteLine();
+PrintExpiry(parts[1]);
 
 return 0;
+
+static void PrintExpiry(string payloadSegment)
+{
+    var json = System.Text.Encoding.UTF8.GetString(Base64UrlDecode(payloadSegment));
+    using var doc = System.Text.Json.JsonDocument.Parse(json);
+
+    if (!doc.RootElement.TryGetProperty("exp", out var expProp))
+    {
+        Console.WriteLine("(sem claim 'exp' — token não tem expiração declarada)");
+        return;
+    }
+
+    var expiresAt = DateTimeOffset.FromUnixTimeSeconds(expProp.GetInt64());
+    var remaining = expiresAt - DateTimeOffset.UtcNow;
+
+    Console.WriteLine(remaining > TimeSpan.Zero
+        ? $"expira em {expiresAt:u} (daqui a {remaining:hh\\:mm\\:ss})"
+        : $"expirou em {expiresAt:u} (há {-remaining:hh\\:mm\\:ss})");
+}
 
 static string PrettyPrint(string base64UrlSegment)
 {
