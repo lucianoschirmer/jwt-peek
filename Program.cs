@@ -1,7 +1,9 @@
-﻿if (args.Length == 0)
+﻿if (args.Length == 0 || args[0] is "-h" or "--help")
 {
-    Console.Error.WriteLine("uso: jwt-peek <token>");
-    return 1;
+    Console.WriteLine("uso: jwt-peek <token>");
+    Console.WriteLine();
+    Console.WriteLine("Decodifica um JWT e imprime header, payload e status de expiração.");
+    return args.Length == 0 ? 1 : 0;
 }
 
 var parts = args[0].Split('.');
